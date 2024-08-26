@@ -30,7 +30,6 @@ final class SettingsViewController: UIViewController, UITableViewDataSource, UIT
         super.viewDidLoad()
         
         setupView()
-        setupViewCallbacks()
         
         fillUI()
         layout()
@@ -40,7 +39,13 @@ final class SettingsViewController: UIViewController, UITableViewDataSource, UIT
      */
     
     private func fillUI() {
+        viewModel.showAlert = { [weak self] alert in
+            self?.present(alert, animated: true)
+        }
         
+        viewModel.dataSource.bind { [weak self] _ in
+            self?._view.tableView.reloadData()
+        }
     }
     
     private func layout() {
@@ -52,26 +57,24 @@ final class SettingsViewController: UIViewController, UITableViewDataSource, UIT
         _view.tableView.delegate = self
     }
     
-    private func setupViewCallbacks() {
-        
-    }
-    
     // MARK: UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        1
+        viewModel.dataSource.value.count
     }
 
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
         let cell = UITableViewCell()
-        cell.textLabel?.text = "Empty Cell"
+        cell.textLabel?.text = viewModel.dataSource.value[safe: indexPath.item] ?? ""
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        viewModel.createAlert()
     }
 }
